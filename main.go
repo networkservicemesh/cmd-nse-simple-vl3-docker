@@ -21,6 +21,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -232,6 +233,9 @@ func main() {
 	}
 	log.FromContext(ctx).Infof("SVID: %q", svid.ID)
 
+	tlsClientConfig := tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny())
+	tlsClientConfig.MinVersion = tls.VersionTLS12
+
 	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 5: create vl3-nse")
 	// ********************************************************************************
@@ -262,9 +266,7 @@ func main() {
 		),
 		grpc.WithTransportCredentials(
 			grpcfd.TransportCredentials(
-				credentials.NewTLS(
-					tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny()),
-				),
+				credentials.NewTLS(tlsClientConfig),
 			),
 		),
 	)
@@ -344,6 +346,9 @@ func main() {
 }
 
 func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Connection, tunnelIP net.IP, source *workloadapi.X509Source) *grpc.Server {
+	tlsServerConfig := tlsconfig.MTLSServerConfig(source, source, tlsconfig.AuthorizeAny())
+	tlsServerConfig.MinVersion = tls.VersionTLS12
+
 	vl3Endpoint := endpoint.NewServer(ctx,
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
 		endpoint.WithName(config.Name),
@@ -371,9 +376,7 @@ func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Co
 		tracing.WithTracing(),
 		grpc.Creds(
 			grpcfd.TransportCredentials(
-				credentials.NewTLS(
-					tlsconfig.MTLSServerConfig(source, source, tlsconfig.AuthorizeAny()),
-				),
+				credentials.NewTLS(tlsServerConfig),
 			),
 		),
 	)
