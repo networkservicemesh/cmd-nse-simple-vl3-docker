@@ -190,6 +190,7 @@ func main() {
 		cancel()
 		<-vppErrCh
 	}()
+	config.TunnelIP = vppinit.Must(vppinit.LinkToAfPacket(ctx, vppConn, config.TunnelIP))
 
 	// ********************************************************************************
 	log.FromContext(ctx).Info("executing phase 3: start spire-server and spire-agent")
@@ -240,7 +241,6 @@ func main() {
 		ctx,
 		config,
 		vppConn,
-		vppinit.Must(vppinit.LinkToAfPacket(ctx, vppConn, config.TunnelIP)),
 		source)
 
 	srvErrCh := grpcutils.ListenAndServe(ctx, listenOn, server)
@@ -343,7 +343,7 @@ func main() {
 	<-vppErrCh
 }
 
-func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Connection, tunnelIP net.IP, source *workloadapi.X509Source) *grpc.Server {
+func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Connection, source *workloadapi.X509Source) *grpc.Server {
 	vl3Endpoint := endpoint.NewServer(ctx,
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
 		endpoint.WithName(config.Name),
@@ -361,7 +361,7 @@ func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Co
 			routes.NewServer(vppConn),
 			tag.NewServer(ctx, vppConn),
 			mechanisms.NewServer(map[string]networkservice.NetworkServiceServer{
-				wireguard.MECHANISM: wireguard.NewServer(vppConn, tunnelIP),
+				wireguard.MECHANISM: wireguard.NewServer(vppConn, config.TunnelIP),
 				kernel.MECHANISM:    kernel.NewServer(vppConn),
 			}),
 		),
