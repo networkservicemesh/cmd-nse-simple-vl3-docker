@@ -8,12 +8,12 @@ require (
 	github.com/edwarnicke/govpp v0.0.0-20220509171552-731995b8f574
 	github.com/edwarnicke/grpcfd v1.1.2
 	github.com/edwarnicke/vpphelper v0.0.0-20210225052320-b4f1f1aff45d
-	github.com/google/uuid v1.1.2
+	github.com/google/uuid v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/networkservicemesh/api v1.3.2-0.20220512163820-8c875d61945b
-	github.com/networkservicemesh/sdk v0.5.1-0.20220513105639-53df7f1140a9
-	github.com/networkservicemesh/sdk-kernel v0.0.0-20220512090846-1ab1aa466ce0
-	github.com/networkservicemesh/sdk-vpp v0.0.0-20220512103113-de5e9edebd74
+	github.com/networkservicemesh/api v1.3.2-0.20220516230921-edaa6f46d6ab
+	github.com/networkservicemesh/sdk v0.5.1-0.20220518154856-dd9b496ef8a4
+	github.com/networkservicemesh/sdk-kernel v0.0.0-20220518181515-c2a30040c868
+	github.com/networkservicemesh/sdk-vpp v0.0.0-20220519084319-e31621d052f2
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spiffe/go-spiffe/v2 v2.0.0
