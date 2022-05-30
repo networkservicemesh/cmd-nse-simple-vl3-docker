@@ -1,19 +1,16 @@
 ARG VPP_VERSION=v22.06-rc0-147-g1c5485ab8
 FROM ghcr.io/edwarnicke/govpp/vpp:${VPP_VERSION} as go
-COPY --from=golang:1.16.3-buster /usr/local/go/ /go
+COPY --from=golang:1.18.2-buster /usr/local/go/ /go
 ENV PATH ${PATH}:/go/bin
 ENV GO111MODULE=on
 ENV CGO_ENABLED=0
 ENV GOBIN=/bin
 RUN rm -r /etc/vpp
-RUN go get github.com/go-delve/delve/cmd/dlv@v1.6.0
-RUN go get github.com/edwarnicke/dl
-RUN dl \
-    https://github.com/spiffe/spire/releases/download/v1.2.2/spire-1.2.2-linux-x86_64-glibc.tar.gz | \
-    tar -xzvf - -C /bin --strip=2 spire-1.2.2/bin/spire-server spire-1.2.2/bin/spire-agent
-RUN dl \
-    https://github.com/coredns/coredns/releases/download/v1.9.1/coredns_1.9.1_linux_amd64.tgz | \
-    tar -xzvf - -C /bin coredns
+RUN go install github.com/go-delve/delve/cmd/dlv@v1.8.2
+ADD https://github.com/spiffe/spire/releases/download/v1.2.2/spire-1.2.2-linux-x86_64-glibc.tar.gz .
+ADD https://github.com/coredns/coredns/releases/download/v1.9.1/coredns_1.9.1_linux_amd64.tgz .
+RUN tar xzvf spire-1.2.2-linux-x86_64-glibc.tar.gz -C /bin --strip=2 spire-1.2.2/bin/spire-server spire-1.2.2/bin/spire-agent
+RUN tar xzvf coredns_1.9.1_linux_amd64.tgz -C /bin coredns
 
 FROM go as build
 WORKDIR /build
