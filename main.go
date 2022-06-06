@@ -62,6 +62,7 @@ import (
 	"github.com/networkservicemesh/sdk/pkg/networkservice/core/adapters"
 	"github.com/networkservicemesh/sdk/pkg/networkservice/core/chain"
 	registryclient "github.com/networkservicemesh/sdk/pkg/registry/chains/client"
+	"github.com/networkservicemesh/sdk/pkg/registry/common/clientinfo"
 	"github.com/networkservicemesh/sdk/pkg/registry/common/dnsresolve"
 	registrysendfd "github.com/networkservicemesh/sdk/pkg/registry/common/sendfd"
 	"github.com/networkservicemesh/sdk/pkg/tools/debug"
@@ -302,6 +303,7 @@ func main() {
 		registryclient.WithNSEClientURLResolver(dnsresolve.NewNetworkServiceEndpointRegistryClient()),
 		registryclient.WithDialOptions(clientOptions...),
 		registryclient.WithNSEAdditionalFunctionality(
+			clientinfo.NewNetworkServiceEndpointRegistryClient(),
 			registrysendfd.NewNetworkServiceEndpointRegistryClient(),
 		),
 	)
