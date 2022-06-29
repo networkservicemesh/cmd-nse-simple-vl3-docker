@@ -21,6 +21,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -83,6 +84,7 @@ import (
 	"github.com/networkservicemesh/sdk-vpp/pkg/networkservice/loopback"
 	"github.com/networkservicemesh/sdk-vpp/pkg/networkservice/mechanisms/kernel"
 	"github.com/networkservicemesh/sdk-vpp/pkg/networkservice/mechanisms/wireguard"
+	"github.com/networkservicemesh/sdk-vpp/pkg/networkservice/pinhole"
 	"github.com/networkservicemesh/sdk-vpp/pkg/networkservice/tag"
 	"github.com/networkservicemesh/sdk-vpp/pkg/networkservice/up"
 	"github.com/networkservicemesh/sdk-vpp/pkg/networkservice/vrf"
@@ -95,7 +97,7 @@ import (
 type Config struct {
 	Name             string            `default:"docker-vl3-server" desc:"Name of vL3 Server"`
 	RequestTimeout   time.Duration     `default:"15s" desc:"timeout to request NSE" split_words:"true"`
-	ConnectTo        url.URL           `default:"tcp://k8s.nsm:5002" desc:"url to connect to" split_words:"true"`
+	ConnectTo        url.URL           `default:"tcp://k8s.nsm" desc:"url to connect to" split_words:"true"`
 	MaxTokenLifetime time.Duration     `default:"10m" desc:"maximum lifetime of tokens" split_words:"true"`
 	ServiceNames     []string          `default:"docker-vl3" desc:"Name of providing service" split_words:"true"`
 	Labels           map[string]string `default:"" desc:"Endpoint labels"`
@@ -237,12 +239,18 @@ func main() {
 	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 5: create vl3-nse")
 	// ********************************************************************************
+	tlsClientConfig := tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny())
+	tlsClientConfig.MinVersion = tls.VersionTLS12
+	tlsServerConfig := tlsconfig.MTLSServerConfig(source, source, tlsconfig.AuthorizeAny())
+	tlsServerConfig.MinVersion = tls.VersionTLS12
+
 	listenOn := &(url.URL{Scheme: "tcp", Host: config.TunnelIP.String() + ":"})
 	server := createVl3Endpoint(
 		ctx,
 		config,
 		vppConn,
-		source)
+		source,
+		tlsServerConfig)
 
 	srvErrCh := grpcutils.ListenAndServe(ctx, listenOn, server)
 	exitOnErr(ctx, cancel, srvErrCh)
@@ -264,7 +272,7 @@ func main() {
 		grpc.WithTransportCredentials(
 			grpcfd.TransportCredentials(
 				credentials.NewTLS(
-					tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny()),
+					tlsClientConfig,
 				),
 			),
 		),
@@ -345,7 +353,7 @@ func main() {
 	<-vppErrCh
 }
 
-func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Connection, source *workloadapi.X509Source) *grpc.Server {
+func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Connection, source *workloadapi.X509Source, tlsServerConfig *tls.Config) *grpc.Server {
 	vl3Endpoint := endpoint.NewServer(ctx,
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
 		endpoint.WithName(config.Name),
@@ -366,6 +374,7 @@ func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Co
 				wireguard.MECHANISM: wireguard.NewServer(vppConn, config.TunnelIP),
 				kernel.MECHANISM:    kernel.NewServer(vppConn),
 			}),
+			pinhole.NewServer(vppConn),
 		),
 	)
 
@@ -374,7 +383,7 @@ func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Co
 		grpc.Creds(
 			grpcfd.TransportCredentials(
 				credentials.NewTLS(
-					tlsconfig.MTLSServerConfig(source, source, tlsconfig.AuthorizeAny()),
+					tlsServerConfig,
 				),
 			),
 		),
