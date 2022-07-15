@@ -10,14 +10,14 @@ require (
 	github.com/edwarnicke/vpphelper v0.0.0-20210225052320-b4f1f1aff45d
 	github.com/google/uuid v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/networkservicemesh/api v1.3.2-0.20220516230921-edaa6f46d6ab
-	github.com/networkservicemesh/sdk v0.5.1-0.20220603191023-6abdf1e0eb19
-	github.com/networkservicemesh/sdk-kernel v0.0.0-20220606222221-50547dc2e107
-	github.com/networkservicemesh/sdk-vpp v0.0.0-20220606222906-645bffdf06c0
+	github.com/networkservicemesh/api v1.4.1-0.20220711153918-a59689088578
+	github.com/networkservicemesh/sdk v0.5.1-0.20220714152344-b8209fc0b7b6
+	github.com/networkservicemesh/sdk-kernel v0.0.0-20220714152734-bcc1fd19a980
+	github.com/networkservicemesh/sdk-vpp v0.0.0-20220715144123-cb60a3af0d14
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spiffe/go-spiffe/v2 v2.0.0
-	github.com/vishvananda/netlink v1.1.1-0.20220118170537-d6b03fdeb845
+	github.com/vishvananda/netlink v1.2.1-beta.2.0.20220630165224-c591ada0fb2b
 	google.golang.org/grpc v1.42.0
 )
 
