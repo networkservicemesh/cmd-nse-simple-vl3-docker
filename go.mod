@@ -10,10 +10,10 @@ require (
 	github.com/edwarnicke/vpphelper v0.0.0-20210225052320-b4f1f1aff45d
 	github.com/google/uuid v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/networkservicemesh/api v1.4.1-0.20220711153918-a59689088578
-	github.com/networkservicemesh/sdk v0.5.1-0.20220721233846-6533a29f28c5
-	github.com/networkservicemesh/sdk-kernel v0.0.0-20220721234300-633fb249123b
-	github.com/networkservicemesh/sdk-vpp v0.0.0-20220721234741-907f8637813a
+	github.com/networkservicemesh/api v1.5.0-rc.1
+	github.com/networkservicemesh/sdk v1.5.0-rc.1
+	github.com/networkservicemesh/sdk-kernel v1.5.0-rc.1
+	github.com/networkservicemesh/sdk-vpp v1.5.0-rc.1
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spiffe/go-spiffe/v2 v2.0.0
