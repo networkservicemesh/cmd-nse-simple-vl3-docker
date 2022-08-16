@@ -100,6 +100,7 @@ type Config struct {
 	ConnectTo        url.URL           `default:"tcp://k8s.nsm" desc:"url to connect to" split_words:"true"`
 	MaxTokenLifetime time.Duration     `default:"10m" desc:"maximum lifetime of tokens" split_words:"true"`
 	ServiceNames     []string          `default:"docker-vl3" desc:"Name of providing service" split_words:"true"`
+	RegisterService  bool              `default:"true" desc:"if true then registers network service on startup" split_words:"true"`
 	Labels           map[string]string `default:"" desc:"Endpoint labels"`
 	TunnelIP         net.IP            `desc:"IP to use for tunnels" split_words:"true"`
 	Vl3Prefix        string            `default:"169.254.0.0/16" desc:"vl3 prefix"`
@@ -315,18 +316,19 @@ func main() {
 			registrysendfd.NewNetworkServiceEndpointRegistryClient(),
 		),
 	)
+	if config.RegisterService {
+		for _, serviceName := range config.ServiceNames {
+			nsRegistryClient := registryclient.NewNetworkServiceRegistryClient(ctx,
+				registryclient.WithNSClientURLResolver(dnsresolve.NewNetworkServiceRegistryClient()),
+				registryclient.WithDialOptions(clientOptions...))
 
-	for _, serviceName := range config.ServiceNames {
-		nsRegistryClient := registryclient.NewNetworkServiceRegistryClient(ctx,
-			registryclient.WithNSClientURLResolver(dnsresolve.NewNetworkServiceRegistryClient()),
-			registryclient.WithDialOptions(clientOptions...))
-
-		_, err = nsRegistryClient.Register(ctx, &registryapi.NetworkService{
-			Name:    serviceName,
-			Payload: payload.IP,
-		})
-		if err != nil {
-			log.FromContext(ctx).Fatalf("unable to register ns %+v", err)
+			_, err = nsRegistryClient.Register(ctx, &registryapi.NetworkService{
+				Name:    serviceName,
+				Payload: payload.IP,
+			})
+			if err != nil {
+				log.FromContext(ctx).Fatalf("unable to register ns %+v", err)
+			}
 		}
 	}
 
