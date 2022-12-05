@@ -50,6 +50,7 @@ import (
 	_ "github.com/networkservicemesh/sdk/pkg/networkservice/core/adapters"
 	_ "github.com/networkservicemesh/sdk/pkg/networkservice/core/chain"
 	_ "github.com/networkservicemesh/sdk/pkg/registry/chains/client"
+	_ "github.com/networkservicemesh/sdk/pkg/registry/common/authorize"
 	_ "github.com/networkservicemesh/sdk/pkg/registry/common/clientinfo"
 	_ "github.com/networkservicemesh/sdk/pkg/registry/common/dnsresolve"
 	_ "github.com/networkservicemesh/sdk/pkg/registry/common/sendfd"
