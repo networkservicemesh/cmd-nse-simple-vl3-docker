@@ -96,19 +96,20 @@ import (
 
 // Config holds configuration parameters from environment variables
 type Config struct {
-	Name             string            `default:"docker-vl3-server" desc:"Name of vL3 Server"`
-	RequestTimeout   time.Duration     `default:"15s" desc:"timeout to request NSE" split_words:"true"`
-	ConnectTo        url.URL           `default:"tcp://k8s.nsm" desc:"url to connect to" split_words:"true"`
-	MaxTokenLifetime time.Duration     `default:"10m" desc:"maximum lifetime of tokens" split_words:"true"`
-	ServiceNames     []string          `default:"docker-vl3" desc:"Name of providing service" split_words:"true"`
-	RegisterService  bool              `default:"true" desc:"if true then registers network service on startup" split_words:"true"`
-	Labels           map[string]string `default:"" desc:"Endpoint labels"`
-	TunnelIP         net.IP            `desc:"IP to use for tunnels" split_words:"true"`
-	Vl3Prefix        string            `default:"169.254.0.0/16" desc:"vl3 prefix"`
-	InterfaceName    string            `default:"nsm" desc:"Name of the nsm network interface"`
-	FederatesWith    string            `default:"k8s.nsm" desc:"Name of the federated domain"`
-	TrustDomain      string            `default:"docker.nsm" desc:"Name of the trust domain"`
-	LogLevel         string            `default:"INFO" desc:"Log level" split_words:"true"`
+	Name                   string            `default:"docker-vl3-server" desc:"Name of vL3 Server"`
+	RequestTimeout         time.Duration     `default:"15s" desc:"timeout to request NSE" split_words:"true"`
+	ConnectTo              url.URL           `default:"tcp://k8s.nsm" desc:"url to connect to" split_words:"true"`
+	MaxTokenLifetime       time.Duration     `default:"10m" desc:"maximum lifetime of tokens" split_words:"true"`
+	RegistryClientPolicies []string          `default:"etc/nsm/opa/common/.*.rego,etc/nsm/opa/registry/.*.rego,etc/nsm/opa/client/.*.rego" desc:"paths to files and directories that contain registry client policies" split_words:"true"`
+	ServiceNames           []string          `default:"docker-vl3" desc:"Name of providing service" split_words:"true"`
+	RegisterService        bool              `default:"true" desc:"if true then registers network service on startup" split_words:"true"`
+	Labels                 map[string]string `default:"" desc:"Endpoint labels"`
+	TunnelIP               net.IP            `desc:"IP to use for tunnels" split_words:"true"`
+	Vl3Prefix              string            `default:"169.254.0.0/16" desc:"vl3 prefix"`
+	InterfaceName          string            `default:"nsm" desc:"Name of the nsm network interface"`
+	FederatesWith          string            `default:"k8s.nsm" desc:"Name of the federated domain"`
+	TrustDomain            string            `default:"docker.nsm" desc:"Name of the trust domain"`
+	LogLevel               string            `default:"INFO" desc:"Log level" split_words:"true"`
 }
 
 // Process prints and processes env to config
@@ -316,14 +317,18 @@ func main() {
 			clientinfo.NewNetworkServiceEndpointRegistryClient(),
 			registrysendfd.NewNetworkServiceEndpointRegistryClient(),
 		),
-		registryclient.WithAuthorizeNSERegistryClient(registryauthorize.NewNetworkServiceEndpointRegistryClient()),
+		registryclient.WithAuthorizeNSERegistryClient(registryauthorize.NewNetworkServiceEndpointRegistryClient(
+			registryauthorize.WithPolicies(config.RegistryClientPolicies...),
+		)),
 	)
 	if config.RegisterService {
 		for _, serviceName := range config.ServiceNames {
 			nsRegistryClient := registryclient.NewNetworkServiceRegistryClient(ctx,
 				registryclient.WithNSClientURLResolver(dnsresolve.NewNetworkServiceRegistryClient()),
 				registryclient.WithDialOptions(clientOptions...),
-				registryclient.WithAuthorizeNSRegistryClient(dnsresolve.NewNetworkServiceRegistryClient()))
+				registryclient.WithAuthorizeNSRegistryClient(registryauthorize.NewNetworkServiceRegistryClient(
+					registryauthorize.WithPolicies(config.RegistryClientPolicies...),
+				)))
 
 			_, err = nsRegistryClient.Register(ctx, &registryapi.NetworkService{
 				Name:    serviceName,
