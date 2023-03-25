@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Cisco and/or its affiliates.
+// Copyright (c) 2022-2023 Cisco and/or its affiliates.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -247,7 +247,7 @@ func main() {
 	tlsServerConfig := tlsconfig.MTLSServerConfig(source, source, tlsconfig.AuthorizeAny())
 	tlsServerConfig.MinVersion = tls.VersionTLS12
 
-	listenOn := &(url.URL{Scheme: "tcp", Host: config.TunnelIP.String() + ":"})
+	listenOn := &(url.URL{Scheme: "tcp", Host: net.JoinHostPort(config.TunnelIP.String(), "")})
 	server := createVl3Endpoint(
 		ctx,
 		config,

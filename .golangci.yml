@@ -170,3 +170,6 @@ issues:
     - path: main.go
       linters:
         - revive
+    - path: vppinit/vppinit.go
+      linters:
+        - gocyclo
