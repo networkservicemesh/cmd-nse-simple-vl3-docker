@@ -266,19 +266,16 @@ func main() {
 	// Since we are using vl3, all connected external clients will be on the same network.
 
 	clientOptions := append(tracing.WithTracingDial(),
-		grpcfd.WithChainStreamInterceptor(),
-		grpcfd.WithChainUnaryInterceptor(),
+		grpc.WithTransportCredentials(
+			grpcfd.TransportCredentials(credentials.NewTLS(tlsClientConfig)),
+		),
+		grpc.WithBlock(),
 		grpc.WithDefaultCallOptions(
 			grpc.WaitForReady(true),
 			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
 		),
-		grpc.WithTransportCredentials(
-			grpcfd.TransportCredentials(
-				credentials.NewTLS(
-					tlsClientConfig,
-				),
-			),
-		),
+		grpcfd.WithChainStreamInterceptor(),
+		grpcfd.WithChainUnaryInterceptor(),
 	)
 
 	dockerClient := createClient(ctx, listenOn, config.RequestTimeout, clientOptions...)
