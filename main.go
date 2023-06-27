@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Cisco and/or its affiliates.
+// Copyright (c) 2022-2023 Cisco and/or its affiliates.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -24,9 +24,6 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	"github.com/google/uuid"
-
-	"io/ioutil"
 	"net"
 	"net/url"
 	"os"
@@ -34,6 +31,8 @@ import (
 	"path/filepath"
 	"syscall"
 	"time"
+
+	"github.com/google/uuid"
 
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/edwarnicke/grpcfd"
@@ -201,7 +200,7 @@ func main() {
 	// ********************************************************************************
 	log.FromContext(ctx).Info("executing phase 3: start spire-server and spire-agent")
 	// ********************************************************************************
-	spireRoot, err := ioutil.TempDir("", "spire")
+	spireRoot, err := os.MkdirTemp("", "spire")
 	if err != nil {
 		log.FromContext(ctx).Fatalf("error while creating spire root: %+v", err)
 	}
