@@ -102,7 +102,7 @@ type Config struct {
 	RegistryClientPolicies []string          `default:"etc/nsm/opa/common/.*.rego,etc/nsm/opa/registry/.*.rego,etc/nsm/opa/client/.*.rego" desc:"paths to files and directories that contain registry client policies" split_words:"true"`
 	ServiceNames           []string          `default:"docker-vl3" desc:"Name of providing service" split_words:"true"`
 	RegisterService        bool              `default:"true" desc:"if true then registers network service on startup" split_words:"true"`
-	RegisterAsUrl          url.URL           `default:"" desc:"Endpoint URL" split_words:"true"`
+	RegisterAsURL          url.URL           `default:"" desc:"Endpoint URL" split_words:"true"`
 	Labels                 map[string]string `default:"" desc:"Endpoint labels"`
 	TunnelIP               net.IP            `desc:"IP to use for tunnels" split_words:"true"`
 	Vl3Prefix              string            `default:"169.254.0.0/16" desc:"vl3 prefix"`
@@ -340,18 +340,18 @@ func main() {
 		}
 	}
 
-	var registerAsUrl *url.URL
-	if config.RegisterAsUrl.String() == "" {
-		registerAsUrl = listenOn
+	var RegisterAsURL *url.URL
+	if config.RegisterAsURL.String() == "" {
+		RegisterAsURL = listenOn
 	} else {
-		registerAsUrl = &config.RegisterAsUrl
+		RegisterAsURL = &config.RegisterAsURL
 	}
 
 	nseRegistration := &registryapi.NetworkServiceEndpoint{
 		Name:                 config.Name,
 		NetworkServiceNames:  config.ServiceNames,
 		NetworkServiceLabels: make(map[string]*registryapi.NetworkServiceLabels),
-		Url:                  registerAsUrl.String(),
+		Url:                  RegisterAsURL.String(),
 	}
 	for _, serviceName := range config.ServiceNames {
 		nseRegistration.NetworkServiceLabels[serviceName] = &registryapi.NetworkServiceLabels{Labels: config.Labels}
