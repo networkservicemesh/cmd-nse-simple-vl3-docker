@@ -57,7 +57,6 @@ import (
 	"github.com/networkservicemesh/sdk/pkg/networkservice/common/authorize"
 	"github.com/networkservicemesh/sdk/pkg/networkservice/common/mechanisms"
 	kernel_sdk "github.com/networkservicemesh/sdk/pkg/networkservice/common/mechanisms/kernel"
-	"github.com/networkservicemesh/sdk/pkg/networkservice/common/mechanisms/sendfd"
 	"github.com/networkservicemesh/sdk/pkg/networkservice/common/retry"
 	"github.com/networkservicemesh/sdk/pkg/networkservice/connectioncontext/ipcontext/vl3"
 	"github.com/networkservicemesh/sdk/pkg/networkservice/core/adapters"
@@ -103,6 +102,7 @@ type Config struct {
 	RegistryClientPolicies []string          `default:"etc/nsm/opa/common/.*.rego,etc/nsm/opa/registry/.*.rego,etc/nsm/opa/client/.*.rego" desc:"paths to files and directories that contain registry client policies" split_words:"true"`
 	ServiceNames           []string          `default:"docker-vl3" desc:"Name of providing service" split_words:"true"`
 	RegisterService        bool              `default:"true" desc:"if true then registers network service on startup" split_words:"true"`
+	RegisterAsURL          url.URL           `default:"" desc:"Endpoint URL" split_words:"true"`
 	Labels                 map[string]string `default:"" desc:"Endpoint labels"`
 	TunnelIP               net.IP            `desc:"IP to use for tunnels" split_words:"true"`
 	Vl3Prefix              string            `default:"169.254.0.0/16" desc:"vl3 prefix"`
@@ -340,11 +340,18 @@ func main() {
 		}
 	}
 
+	var RegisterAsURL *url.URL
+	if config.RegisterAsURL.Scheme == "" {
+		RegisterAsURL = listenOn
+	} else {
+		RegisterAsURL = &config.RegisterAsURL
+	}
+
 	nseRegistration := &registryapi.NetworkServiceEndpoint{
 		Name:                 config.Name,
 		NetworkServiceNames:  config.ServiceNames,
 		NetworkServiceLabels: make(map[string]*registryapi.NetworkServiceLabels),
-		Url:                  listenOn.String(),
+		Url:                  RegisterAsURL.String(),
 	}
 	for _, serviceName := range config.ServiceNames {
 		nseRegistration.NetworkServiceLabels[serviceName] = &registryapi.NetworkServiceLabels{Labels: config.Labels}
@@ -375,7 +382,6 @@ func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Co
 			unnumbered.NewServer(vppConn, loopback.Load),
 			vrf.NewServer(vppConn, vrf.WithLoadInterface(loopback.Load)),
 			loopback.NewServer(vppConn),
-			sendfd.NewServer(),
 			up.NewServer(ctx, vppConn),
 			mtu.NewServer(vppConn),
 			routes.NewServer(vppConn),
