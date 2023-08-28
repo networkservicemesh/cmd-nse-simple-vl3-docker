@@ -341,7 +341,7 @@ func main() {
 	}
 
 	var RegisterAsURL *url.URL
-	if config.RegisterAsURL.String() == "" {
+	if config.RegisterAsURL.Scheme == "" {
 		RegisterAsURL = listenOn
 	} else {
 		RegisterAsURL = &config.RegisterAsURL
