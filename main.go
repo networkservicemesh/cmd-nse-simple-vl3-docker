@@ -33,11 +33,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kelseyhightower/envconfig"
+	"github.com/pkg/errors"
 
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/edwarnicke/grpcfd"
-	"github.com/kelseyhightower/envconfig"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -65,7 +65,6 @@ import (
 	registryauthorize "github.com/networkservicemesh/sdk/pkg/registry/common/authorize"
 	"github.com/networkservicemesh/sdk/pkg/registry/common/clientinfo"
 	"github.com/networkservicemesh/sdk/pkg/registry/common/dnsresolve"
-	registrysendfd "github.com/networkservicemesh/sdk/pkg/registry/common/sendfd"
 	"github.com/networkservicemesh/sdk/pkg/tools/debug"
 	"github.com/networkservicemesh/sdk/pkg/tools/grpcutils"
 	"github.com/networkservicemesh/sdk/pkg/tools/interdomain"
@@ -107,8 +106,8 @@ type Config struct {
 	TunnelIP               net.IP            `desc:"IP to use for tunnels" split_words:"true"`
 	Vl3Prefix              string            `default:"169.254.0.0/16" desc:"vl3 prefix"`
 	InterfaceName          string            `default:"nsm" desc:"Name of the nsm network interface"`
-	FederatesWith          string            `default:"k8s.nsm" desc:"Name of the federated domain"`
-	TrustDomain            string            `default:"docker.nsm" desc:"Name of the trust domain"`
+	FederatesWith          string            `default:"k8s.nsm" desc:"Name of the federated domain" split_words:"true"`
+	TrustDomain            string            `default:"docker.nsm" desc:"Name of the trust domain" split_words:"true"`
 	LogLevel               string            `default:"INFO" desc:"Log level" split_words:"true"`
 }
 
@@ -309,18 +308,7 @@ func main() {
 	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 7: register nse with nsm")
 	// ********************************************************************************
-	nseRegistryClient := registryclient.NewNetworkServiceEndpointRegistryClient(
-		ctx,
-		registryclient.WithNSEClientURLResolver(dnsresolve.NewNetworkServiceEndpointRegistryClient()),
-		registryclient.WithDialOptions(clientOptions...),
-		registryclient.WithNSEAdditionalFunctionality(
-			clientinfo.NewNetworkServiceEndpointRegistryClient(),
-			registrysendfd.NewNetworkServiceEndpointRegistryClient(),
-		),
-		registryclient.WithAuthorizeNSERegistryClient(registryauthorize.NewNetworkServiceEndpointRegistryClient(
-			registryauthorize.WithPolicies(config.RegistryClientPolicies...),
-		)),
-	)
+
 	if config.RegisterService {
 		for _, serviceName := range config.ServiceNames {
 			nsRegistryClient := registryclient.NewNetworkServiceRegistryClient(ctx,
@@ -340,23 +328,7 @@ func main() {
 		}
 	}
 
-	var RegisterAsURL *url.URL
-	if config.RegisterAsURL.Scheme == "" {
-		RegisterAsURL = listenOn
-	} else {
-		RegisterAsURL = &config.RegisterAsURL
-	}
-
-	nseRegistration := &registryapi.NetworkServiceEndpoint{
-		Name:                 config.Name,
-		NetworkServiceNames:  config.ServiceNames,
-		NetworkServiceLabels: make(map[string]*registryapi.NetworkServiceLabels),
-		Url:                  RegisterAsURL.String(),
-	}
-	for _, serviceName := range config.ServiceNames {
-		nseRegistration.NetworkServiceLabels[serviceName] = &registryapi.NetworkServiceLabels{Labels: config.Labels}
-	}
-	nseRegistration, err = nseRegistryClient.Register(ctx, nseRegistration)
+	nseRegistration, err := RegisterNetworkServiceEndpoint(ctx, config, net.DefaultResolver, listenOn, clientOptions)
 	log.FromContext(ctx).Infof("registered nse: %+v", nseRegistration)
 
 	if err != nil {
@@ -444,4 +416,38 @@ func exitOnErr(ctx context.Context, cancel context.CancelFunc, errCh <-chan erro
 		log.FromContext(ctx).Error(err)
 		cancel()
 	}(ctx, errCh)
+}
+
+func RegisterNetworkServiceEndpoint(ctx context.Context, config *Config, resolver dnsresolve.Resolver, listenOn *url.URL, clientOptions []grpc.DialOption) (*registryapi.NetworkServiceEndpoint, error) {
+	nseRegistryClient := registryclient.NewNetworkServiceEndpointRegistryClient(
+		ctx,
+		registryclient.WithNSEClientURLResolver(dnsresolve.NewNetworkServiceEndpointRegistryClient(dnsresolve.WithResolver(resolver))),
+		registryclient.WithDialOptions(clientOptions...),
+		registryclient.WithNSEAdditionalFunctionality(
+			clientinfo.NewNetworkServiceEndpointRegistryClient(),
+		),
+		registryclient.WithAuthorizeNSERegistryClient(registryauthorize.NewNetworkServiceEndpointRegistryClient(
+			registryauthorize.WithPolicies(config.RegistryClientPolicies...),
+		)),
+	)
+
+	var registerAsURL *url.URL
+	if config.RegisterAsURL.Scheme == "" {
+		registerAsURL = listenOn
+	} else {
+		registerAsURL = &config.RegisterAsURL
+	}
+
+	nseRegistration := &registryapi.NetworkServiceEndpoint{
+		Name:                 config.Name,
+		NetworkServiceNames:  config.ServiceNames,
+		NetworkServiceLabels: make(map[string]*registryapi.NetworkServiceLabels),
+		Url:                  registerAsURL.String(),
+	}
+	for _, serviceName := range config.ServiceNames {
+		nseRegistration.NetworkServiceLabels[serviceName] = &registryapi.NetworkServiceLabels{Labels: config.Labels}
+	}
+	nseRegistration, err := nseRegistryClient.Register(ctx, nseRegistration)
+
+	return nseRegistration, err
 }
