@@ -25,9 +25,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	main "github.com/networkservicemesh/cmd-nse-simple-vl3-docker"
 	"github.com/networkservicemesh/sdk/pkg/tools/sandbox"
-	"github.com/stretchr/testify/require"
 )
 
 func TestEndpointRegister(t *testing.T) {
