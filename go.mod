@@ -9,7 +9,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.12.1-rc.1.0.20240301085602-d5e1eb84eeb4
 	github.com/networkservicemesh/govpp v0.0.0-20240312165607-3c0a753ca3bf
-	github.com/networkservicemesh/sdk v0.5.1-0.20240212105149-b1a3e26da857
+	github.com/networkservicemesh/sdk v0.5.1-0.20240319090455-a9e38d90df62
 	github.com/networkservicemesh/sdk-kernel v0.0.0-20240212105448-f9f740175836
 	github.com/networkservicemesh/sdk-vpp v0.0.0-20240315112915-61dd50668ab8
 	github.com/networkservicemesh/vpphelper v0.0.0-20240115135903-e2b961f768b6

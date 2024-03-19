@@ -1,4 +1,4 @@
-// Copyright (c) 2022-2023 Cisco and/or its affiliates.
+// Copyright (c) 2022-2024 Cisco and/or its affiliates.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -46,7 +46,6 @@ import (
 
 	"github.com/networkservicemesh/vpphelper"
 
-	"github.com/networkservicemesh/api/pkg/api/ipam"
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/cls"
 	kernelsdk "github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/kernel"
@@ -122,14 +121,10 @@ func (c *Config) Process() error {
 	return nil
 }
 
-func startListenPrefixes(c *Config) <-chan *ipam.PrefixResponse {
-	response := make(chan *ipam.PrefixResponse, 1)
-	defer close(response)
-
-	response <- &ipam.PrefixResponse{
-		Prefix: c.Vl3Prefix,
-	}
-	return response
+func initializeVl3IPAM(ctx context.Context, c *Config) *vl3.IPAM {
+	vl3IPAM := new(vl3.IPAM)
+	vl3IPAM.Reset(context.Background(), c.Vl3Prefix, []string{})
+	return vl3IPAM
 }
 
 func main() {
@@ -348,7 +343,7 @@ func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Co
 		endpoint.WithName(config.Name),
 		endpoint.WithAuthorizeServer(authorize.NewServer()),
 		endpoint.WithAdditionalFunctionality(
-			vl3.NewServer(ctx, startListenPrefixes(config)),
+			vl3.NewServer(ctx, initializeVl3IPAM(ctx, config)),
 			up.NewServer(ctx, vppConn, up.WithLoadSwIfIndex(loopback.Load)),
 			ipaddress.NewServer(vppConn, ipaddress.WithLoadSwIfIndex(loopback.Load)),
 			unnumbered.NewServer(vppConn, loopback.Load),
