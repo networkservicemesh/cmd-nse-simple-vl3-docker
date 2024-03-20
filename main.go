@@ -123,7 +123,7 @@ func (c *Config) Process() error {
 
 func initializeVl3IPAM(ctx context.Context, c *Config) *vl3.IPAM {
 	vl3IPAM := new(vl3.IPAM)
-	vl3IPAM.Reset(context.Background(), c.Vl3Prefix, []string{})
+	vl3IPAM.Reset(ctx, c.Vl3Prefix, []string{})
 	return vl3IPAM
 }
 
