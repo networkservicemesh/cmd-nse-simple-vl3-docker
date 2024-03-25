@@ -121,12 +121,6 @@ func (c *Config) Process() error {
 	return nil
 }
 
-func initializeVl3IPAM(ctx context.Context, c *Config) *vl3.IPAM {
-	vl3IPAM := new(vl3.IPAM)
-	vl3IPAM.Reset(ctx, c.Vl3Prefix, []string{})
-	return vl3IPAM
-}
-
 func main() {
 	// ********************************************************************************
 	// setup context to catch signals
@@ -343,7 +337,7 @@ func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Co
 		endpoint.WithName(config.Name),
 		endpoint.WithAuthorizeServer(authorize.NewServer()),
 		endpoint.WithAdditionalFunctionality(
-			vl3.NewServer(ctx, initializeVl3IPAM(ctx, config)),
+			vl3.NewServer(ctx, vl3.NewIPAM(config.Vl3Prefix)),
 			up.NewServer(ctx, vppConn, up.WithLoadSwIfIndex(loopback.Load)),
 			ipaddress.NewServer(vppConn, ipaddress.WithLoadSwIfIndex(loopback.Load)),
 			unnumbered.NewServer(vppConn, loopback.Load),
