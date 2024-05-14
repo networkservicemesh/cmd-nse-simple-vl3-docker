@@ -103,8 +103,8 @@ type Config struct {
 	RegisterAsURL          url.URL           `default:"" desc:"Endpoint URL" split_words:"true"`
 	Labels                 map[string]string `default:"" desc:"Endpoint labels"`
 	TunnelIP               net.IP            `desc:"IP to use for tunnels" split_words:"true"`
-	Vl3Prefix              string            `default:"169.254.0.0/16" desc:"vl3 prefix"`
-	InterfaceName          string            `default:"nsm" desc:"Name of the nsm network interface"`
+	Vl3Prefix              string            `default:"169.254.0.0/16" desc:"vl3 prefix" split_words:"true"`
+	InterfaceName          string            `default:"nsm" desc:"Name of the nsm network interface" split_words:"true"`
 	FederatesWith          string            `default:"k8s.nsm" desc:"Name of the federated domain" split_words:"true"`
 	TrustDomain            string            `default:"docker.nsm" desc:"Name of the trust domain" split_words:"true"`
 	LogLevel               string            `default:"INFO" desc:"Log level" split_words:"true"`
