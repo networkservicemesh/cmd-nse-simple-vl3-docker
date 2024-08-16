@@ -54,6 +54,7 @@ import (
 	_ "github.com/networkservicemesh/sdk/pkg/tools/interdomain"
 	_ "github.com/networkservicemesh/sdk/pkg/tools/log"
 	_ "github.com/networkservicemesh/sdk/pkg/tools/log/logruslogger"
+	_ "github.com/networkservicemesh/sdk/pkg/tools/pprofutils"
 	_ "github.com/networkservicemesh/sdk/pkg/tools/sandbox"
 	_ "github.com/networkservicemesh/sdk/pkg/tools/spiffejwt"
 	_ "github.com/networkservicemesh/sdk/pkg/tools/spire"

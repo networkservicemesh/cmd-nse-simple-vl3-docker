@@ -35,6 +35,8 @@ docker build .
 * `NSM_FEDERATES_WITH`           - Name of the federated domain (default: "k8s.nsm")
 * `NSM_TRUST_DOMAIN`             - Name of the trust domain (default: "docker.nsm")
 * `NSM_LOG_LEVEL`                - Log level (default: "INFO")
+* `NSM_PPROF_ENABLED`            - is pprof enabled (default: "false")
+* `NSM_PPROF_LISTEN_ON`          - pprof URL to ListenAndServe (default: "localhost:6060")
 
 # Testing
 
