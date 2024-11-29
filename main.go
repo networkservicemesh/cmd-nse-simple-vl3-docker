@@ -35,6 +35,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/pkg/errors"
+	"go.fd.io/govpp/api"
 
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/edwarnicke/grpcfd"
@@ -343,7 +344,7 @@ func main() {
 	<-vppErrCh
 }
 
-func createVl3Endpoint(ctx context.Context, config *Config, vppConn vpphelper.Connection, source *workloadapi.X509Source, tlsServerConfig *tls.Config) *grpc.Server {
+func createVl3Endpoint(ctx context.Context, config *Config, vppConn api.Connection, source *workloadapi.X509Source, tlsServerConfig *tls.Config) *grpc.Server {
 	vl3Endpoint := endpoint.NewServer(ctx,
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
 		endpoint.WithName(config.Name),
