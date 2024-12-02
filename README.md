@@ -20,23 +20,24 @@ docker build .
 
 ## Environment config
 
-* `NSM_NAME`                     - Name of vL3 Server (default: "docker-vl3-server")
-* `NSM_REQUEST_TIMEOUT`          - timeout to request NSE (default: "15s")
-* `NSM_CONNECT_TO`               - url to connect to (default: "tcp://k8s.nsm")
-* `NSM_MAX_TOKEN_LIFETIME`       - maximum lifetime of tokens (default: "10m")
-* `NSM_REGISTRY_CLIENT_POLICIES` - paths to files and directories that contain registry client policies (default: "etc/nsm/opa/common/.*.rego,etc/nsm/opa/registry/.*.rego,etc/nsm/opa/client/.*.rego")
-* `NSM_SERVICE_NAMES`            - Name of providing service (default: "docker-vl3")
-* `NSM_REGISTER_SERVICE`         - if true then registers network service on startup (default: "true")
-* `NSM_REGISTER_AS_URL`          - Endpoint URL
-* `NSM_LABELS`                   - Endpoint labels
-* `NSM_TUNNEL_IP`                - IP to use for tunnels
-* `NSM_VL3_PREFIX`               - vl3 prefix (default: "169.254.0.0/16")
-* `NSM_INTERFACE_NAME`           - Name of the nsm network interface (default: "nsm")
-* `NSM_FEDERATES_WITH`           - Name of the federated domain (default: "k8s.nsm")
-* `NSM_TRUST_DOMAIN`             - Name of the trust domain (default: "docker.nsm")
-* `NSM_LOG_LEVEL`                - Log level (default: "INFO")
-* `NSM_PPROF_ENABLED`            - is pprof enabled (default: "false")
-* `NSM_PPROF_LISTEN_ON`          - pprof URL to ListenAndServe (default: "localhost:6060")
+* `NSM_NAME`                        - Name of vL3 Server (default: "docker-vl3-server")
+* `NSM_REQUEST_TIMEOUT`             - timeout to request NSE (default: "15s")
+* `NSM_CONNECT_TO`                  - url to connect to (default: "tcp://k8s.nsm")
+* `NSM_MAX_TOKEN_LIFETIME`          - maximum lifetime of tokens (default: "10m")
+* `NSM_REGISTRY_CLIENT_POLICIES`    - paths to files and directories that contain registry client policies (default: "etc/nsm/opa/common/.*.rego,etc/nsm/opa/registry/.*.rego,etc/nsm/opa/client/.*.rego") 
+* `NSM_SERVICE_NAMES`               - Name of providing service (default: "docker-vl3")
+* `NSM_REGISTER_SERVICE`            - if true then registers network service on startup (default: "true")
+* `NSM_REGISTER_AS_URL`             - Endpoint URL
+* `NSM_LABELS`                      - Endpoint labels
+* `NSM_TUNNEL_IP`                   - IP to use for tunnels
+* `NSM_VL3_PREFIX`                  - vl3 prefix (default: "169.254.0.0/16")
+* `NSM_INTERFACE_NAME`              - Name of the nsm network interface (default: "nsm")
+* `NSM_FEDERATES_WITH`              - Name of the federated domain (default: "k8s.nsm")
+* `NSM_TRUST_DOMAIN`                - Name of the trust domain (default: "docker.nsm")
+* `NSM_LOG_LEVEL`                   - Log level (default: "INFO")
+* `NSM_PPROF_ENABLED`               - is pprof enabled (default: "false")
+* `NSM_PPROF_LISTEN_ON`             - pprof URL to ListenAndServe (default: "localhost:6060")
+* `NSM_VPP_MIN_OPERATION_TIMEOUT`   - minimum timeout for every vpp operation
 
 # Testing
 

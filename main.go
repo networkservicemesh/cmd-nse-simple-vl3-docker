@@ -46,6 +46,7 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	"github.com/networkservicemesh/vpphelper"
+	"github.com/networkservicemesh/vpphelper/extendtimeout"
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/cls"
@@ -112,6 +113,7 @@ type Config struct {
 	LogLevel               string            `default:"INFO" desc:"Log level" split_words:"true"`
 	PprofEnabled           bool              `default:"false" desc:"is pprof enabled" split_words:"true"`
 	PprofListenOn          string            `default:"localhost:6060" desc:"pprof URL to ListenAndServe" split_words:"true"`
+	VPPMinOperationTimeout time.Duration     `default:"2s" desc:"minimum timeout for every vpp operation" split_words:"true"`
 }
 
 // Process prints and processes env to config
@@ -198,6 +200,7 @@ func main() {
 		<-vppErrCh
 	}()
 	config.TunnelIP = vppinit.Must(vppinit.LinkToAfPacket(ctx, vppConn, config.TunnelIP))
+	vppConn = extendtimeout.NewConnection(vppConn, config.VPPMinOperationTimeout)
 
 	// ********************************************************************************
 	log.FromContext(ctx).Info("executing phase 3: start spire-server and spire-agent")
